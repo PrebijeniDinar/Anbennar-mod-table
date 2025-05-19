@@ -1,3 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Steam Workshop Mods Table</title>
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .tag {
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      padding: 3px 8px;
+      margin: 2px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .tag.active {
+      background-color: #4caf50;
+      color: white;
+    }
+    #tagFilter {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Steam Workshop Mods</h2>
+
+  <!-- Category Filter -->
+  <label for="categoryFilter">Filter by Main Category:</label>
+  <select id="categoryFilter">
+    <option value="">All</option>
+    <option value="Gameplay">Gameplay</option>
+    <option value="Weapons">Weapons</option>
+    <option value="Visuals">Visuals</option>
+    <!-- Add more categories here -->
+  </select>
+
+  <!-- Tag Filter Display -->
+  <div id="tagFilter"></div>
+
+  <!-- Mod Table -->
 <table id="modTable" class="display" style="width:100%">
   <thead>
     <tr>
@@ -7,24 +56,96 @@
       <th>Main Category</th>
       <th>Tags</th>
       <th>Browser Link</th>
-     <th>Steam Link</th>
+      <th>Steam Link</th>
     </tr>
   </thead>
-
   <tbody>
-    	<tr data-tags="Zombie,Gun,Survival">
-        <td>Epic Zombie Mod</td>
-        <td>Terrifying overhaul with undead and weapons</td>
-        <td>Sat May 10 2025 00:00:00 GMT+0200 (Central European Summer Time)</td>
-        <td>Gameplay</td>
-        <td>
-          <span class="tag">Zombie</span>
-          <span class="tag">Gun</span>
-         <span class="tag">Survival</span>
-        </td>
-        <td><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=123456" target="_blank">Open in Browser</a></td>
-        <td><a href="steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=123456">Open in Steam</a></td>
-      </tr>
+    <tr data-tags="Zombie,Gun,Survival">
+      <td>Epic Zombie Mod</td>
+      <td>2025-05-10</td>
+      <td>Gameplay</td>
+      <td>
+        <span class="tag">Zombie</span>
+        <span class="tag">Gun</span>
+        <span class="tag">Survival</span>
+      </td>
+      <td><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=123456" target="_blank">Open in Browser</a></td>
+      <td><a href="steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=123456">Open in Steam</a></td>
+    </tr>
+    <tr data-tags="Graphics,Shader,Lighting">
+      <td>Ultra Realistic Lighting</td>
+      <td>2025-05-14</td>
+      <td>Visuals</td>
+      <td>
+        <span class="tag">Graphics</span>
+        <span class="tag">Shader</span>
+        <span class="tag">Lighting</span>
+      </td>
+      <td><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=654321" target="_blank">Open in Browser</a></td>
+      <td><a href="steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=654321">Open in Steam</a></td>
+    </tr>
+    <tr data-tags="Zombie,Gun,Survival">
+      <td>Epic Zombie Mod</td>
+      <td>A terrifying overhaul mod featuring undead hordes and custom weapons.</td>
+      <td>2025-05-10</td>
+      <td>Gameplay</td>
+      <td>
+        <span class="tag">Zombie</span>
+        <span class="tag">Gun</span>
+        <span class="tag">Survival</span>
+      </td>
+      <td><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=123456" target="_blank">Open in Browser</a></td>
+      <td><a href="steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=123456">Open in Steam</a></td>
+    </tr>
+
     <!-- Add more rows -->
   </tbody>
 </table>
+
+  <!-- DataTables and jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      const table = $('#modTable').DataTable();
+
+      // Filter by category
+      $('#categoryFilter').on('change', function () {
+        const value = $(this).val();
+        table.column(1).search(value).draw();
+      });
+
+      // Tag filter logic
+      const tagSet = new Set();
+      $('#modTable tbody tr').each(function () {
+        const tags = $(this).data('tags').split(',');
+        tags.forEach(t => tagSet.add(t.trim()));
+      });
+
+      tagSet.forEach(tag => {
+        $('#tagFilter').append(`<span class="tag" data-tag="${tag}">${tag}</span>`);
+      });
+
+      let activeTags = [];
+
+      $('#tagFilter').on('click', '.tag', function () {
+        const tag = $(this).data('tag');
+        $(this).toggleClass('active');
+
+        if ($(this).hasClass('active')) {
+          activeTags.push(tag);
+        } else {
+          activeTags = activeTags.filter(t => t !== tag);
+        }
+
+        // Custom tag filter
+        table.rows().every(function () {
+          const rowTags = this.node().dataset.tags.split(',');
+          const matches = activeTags.every(tag => rowTags.includes(tag));
+          $(this.node()).toggle(matches || activeTags.length === 0);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
