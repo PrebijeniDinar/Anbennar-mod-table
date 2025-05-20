@@ -1466,16 +1466,16 @@
     $(document).ready(function () {
       const table = $('#modTable').DataTable();
 
-      // Filter by category
+      // Category filter
       $('#categoryFilter').on('change', function () {
         const value = $(this).val();
         table.column(3).search('^' + value + '$', true, false).draw();
       });
 
-      // Tag filter logic
+      // Tag generation
       const tagSet = new Set();
       $('#modTable tbody tr').each(function () {
-        const tags = $(this).data('tags').split(',');
+        const tags = $(this).data('tags')?.split(',') || [];
         tags.forEach(t => tagSet.add(t.trim()));
       });
 
@@ -1485,6 +1485,7 @@
 
       let activeTags = [];
 
+      // Tag filter handler
       $('#tagFilter').on('click', '.tag', function () {
         const tag = $(this).data('tag');
         $(this).toggleClass('active');
@@ -1495,14 +1496,20 @@
           activeTags = activeTags.filter(t => t !== tag);
         }
 
-        // Custom tag filter
-        table.rows().every(function () {
-          const rowTags = this.node().dataset.tags.split(',');
-          const matches = activeTags.every(tag => rowTags.includes(tag));
-          $(this.node()).toggle(matches || activeTags.length === 0);
-        });
+        table.draw();
+      });
+
+      // Global search function for tags
+      $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+        if (activeTags.length === 0) return true;
+
+        const row = table.row(dataIndex).node();
+        const rowTags = row.dataset.tags ? row.dataset.tags.split(',') : [];
+
+        return activeTags.every(tag => rowTags.includes(tag));
       });
     });
   </script>
+
 </body>
 </html>
