@@ -2063,7 +2063,7 @@
   <td><a href="steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=3374199450">Open in Steam</a></td>
 </tr>
 
-    
+
       <!-- Add more rows -->
     
     </tbody>
@@ -2077,10 +2077,14 @@
     $(document).ready(function () {
       const table = $('#modTable').DataTable();
 
-      // Category filter
+      // Filter by category
       $('#categoryFilter').on('change', function () {
         const value = $(this).val();
-        table.column(3).search('^' + value + '$', true, false).draw();
+        if (value) {
+          table.column(3).search('^' + value + '$', true, false).draw();
+        } else {
+          table.column(3).search('').draw(); // Clear filter when "All" is selected
+        }
       });
 
       // Tag generation
