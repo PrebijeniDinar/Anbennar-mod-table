@@ -321,49 +321,56 @@
 </table>
 
   <!-- DataTables and jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      const table = $('#modTable').DataTable();
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+  $(document).ready(function () {
+    const table = $('#modTable').DataTable();
 
-      // Filter by category
-      $('#categoryFilter').on('change', function () {
-        const value = $(this).val();
-        table.column(3).search(value ? '^' + value + '$' : '', true, false).draw();
-      });
-
-      // Tag filter logic
-      const tagSet = new Set();
-      $('#modTable tbody tr').each(function () {
-        const tags = $(this).data('tags').split(',');
-        tags.forEach(t => tagSet.add(t.trim()));
-      });
-
-      tagSet.forEach(tag => {
-        $('#tagFilter').append(`<span class="tag" data-tag="${tag}">${tag}</span>`);
-      });
-
-      let activeTags = [];
-
-      $('#tagFilter').on('click', '.tag', function () {
-        const tag = $(this).data('tag');
-        $(this).toggleClass('active');
-
-        if ($(this).hasClass('active')) {
-          activeTags.push(tag);
-        } else {
-          activeTags = activeTags.filter(t => t !== tag);
-        }
-
-        // Custom tag filter
-        table.rows().every(function () {
-          const rowTags = this.node().dataset.tags.split(',');
-          const matches = activeTags.every(tag => rowTags.includes(tag));
-          $(this.node()).toggle(matches || activeTags.length === 0);
-        });
-      });
+    // Filter by category
+    $('#categoryFilter').on('change', function () {
+      const value = $(this).val();
+      table.column(3).search(value ? '^' + value + '$' : '', true, false).draw();
     });
-  </script>
+
+    // --- Tag filtering ---
+    let activeTags = [];
+
+    // Register custom filter function for DataTables
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      if (activeTags.length === 0) return true;
+
+      const row = table.row(dataIndex).node();
+      const rowTags = row.dataset.tags ? row.dataset.tags.split(',') : [];
+      return activeTags.every(tag => rowTags.includes(tag));
+    });
+
+    // Build the tag buttons
+    const tagSet = new Set();
+    $('#modTable tbody tr').each(function () {
+      const tags = $(this).data('tags')?.split(',') || [];
+      tags.forEach(t => tagSet.add(t.trim()));
+    });
+
+    tagSet.forEach(tag => {
+      $('#tagFilter').append(`<span class="tag" data-tag="${tag}">${tag}</span>`);
+    });
+
+    // Tag button click handler
+    $('#tagFilter').on('click', '.tag', function () {
+      const tag = $(this).data('tag');
+      $(this).toggleClass('active');
+
+      if ($(this).hasClass('active')) {
+        activeTags.push(tag);
+      } else {
+        activeTags = activeTags.filter(t => t !== tag);
+      }
+
+      table.draw(); // Trigger filter re-evaluation
+    });
+  });
+</script>
+
 </body>
 </html>
