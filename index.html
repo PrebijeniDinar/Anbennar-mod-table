@@ -2105,8 +2105,7 @@
       const tagSet = new Set();
 
       // Get all rows from the table, not just visible ones
-
-      const tagSet = new Set();
+      
       table.rows().every(function () {
         const tags = this.node().dataset.tags?.split(',') || [];
         tags.forEach(t => tagSet.add(t.trim()));
