@@ -203,18 +203,27 @@
     let modData = [];
 
     async function loadData() {
-      try {
-        const response = await fetch(CSV_URL);
-        const csvText = await response.text();
-        modData = parseCSV(csvText);
-        buildTable();
-        setupControls();
-        // do NOT call applyFilters here; wait for tableBuilt event
-      } catch (error) {
-        console.error('Failed to load data:', error);
-        document.getElementById('modTable').innerText = 'Error loading data. Check console.';
-      }
-    }
+  try {
+    // YOUR ORIGINAL PUBLISHED CSV URL (without proxy, direct from Google Sheets)
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtgc37M1MD3aBODr1Gz2zU92rj5dVausKxbFk2cr5nIzFEpFNge2T_t6Qm9X9x4y-GH46PCwOyP1nw/pub?output=csv';
+    
+    // Add a cache-busting timestamp
+    const separator = sheetUrl.includes('?') ? '&' : '?';
+    const bustedUrl = sheetUrl + separator + 'cache=' + Date.now();
+    
+    // Wrap in CORS proxy
+    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(bustedUrl);
+    
+    const response = await fetch(proxyUrl);
+    const csvText = await response.text();
+    modData = parseCSV(csvText);
+    buildTable();
+    setupControls();
+  } catch (error) {
+    console.error('Failed to load data:', error);
+    document.getElementById('modTable').innerText = 'Error loading data. Check console.';
+  }
+}
 
     function parseCSV(text) {
       if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // remove BOM
