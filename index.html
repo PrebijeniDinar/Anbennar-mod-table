@@ -190,10 +190,11 @@
 
   <script src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
   <script>
-    // ======================================================================
-    // CONFIGURATION – PUT YOUR PUBLISHED GOOGLE SHEET CSV URL HERE
-    // ======================================================================
-    const CSV_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQtgc37M1MD3aBODr1Gz2zU92rj5dVausKxbFk2cr5nIzFEpFNge2T_t6Qm9X9x4y-GH46PCwOyP1nw/pub?output=csv'); // <-- REPLACE THIS
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Just put the fucking link here
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   const CSV_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQtgc37M1MD3aBODr1Gz2zU92rj5dVausKxbFk2cr5nIzFEpFNge2T_t6Qm9X9x4y-GH46PCwOyP1nw/pub?output=csv');
 
     let table;
     let selectedTags = [];
@@ -208,7 +209,7 @@
         modData = parseCSV(csvText);
         buildTable();
         setupControls();
-        applyFilters();
+        // do NOT call applyFilters here; wait for tableBuilt event
       } catch (error) {
         console.error('Failed to load data:', error);
         document.getElementById('modTable').innerText = 'Error loading data. Check console.';
@@ -216,9 +217,10 @@
     }
 
     function parseCSV(text) {
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // remove BOM
       const lines = text.split('\n').filter(line => line.trim() !== '');
       if (lines.length < 2) return [];
-      const headers = lines[0].split(',').map(h => h.trim());
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
       const data = [];
       for (let i = 1; i < lines.length; i++) {
         const values = [];
@@ -228,18 +230,17 @@
           if (char === '"') {
             inQuotes = !inQuotes;
           } else if (char === ',' && !inQuotes) {
-            values.push(current.trim());
+            values.push(current.trim().replace(/^"|"$/g, ''));
             current = '';
           } else {
             current += char;
           }
         }
-        values.push(current.trim());
-        if (values.length !== headers.length) continue;
+        values.push(current.trim().replace(/^"|"$/g, ''));
+        while (values.length < headers.length) values.push('');
         const row = {};
         headers.forEach((header, idx) => {
-          let val = values[idx].replace(/^"|"$/g, '');
-          row[header] = val;
+          row[header] = values[idx] || '';
         });
         data.push(row);
       }
@@ -259,7 +260,6 @@
         category: row['Category'] || 'Miscellaneous',
         tags: row['Tags'] ? row['Tags'].split(',').map(t => t.trim()).filter(t => t) : [],
         description: row['Description'] || '',
-        // Changed to use the new column name:
         dependencies: row['Dependency/Compatch'] ? row['Dependency/Compatch'].split(',').map(d => d.trim()).filter(d => d) : [],
         links: generateLinks(row['Workshop ID'] || '')
       };
@@ -303,7 +303,14 @@
                       <a href="${links.steam}" class="link-btn">Steam</a>`;
             }, width: 130, headerSort: false }
         ],
-        dataFiltered: function() { updateModCounter(); }
+        // Wait for the table to be fully built before applying filters
+        tableBuilt: function() {
+          applyFilters();
+          updateModCounter();
+        },
+        dataFiltered: function() {
+          updateModCounter();
+        }
       });
     }
 
@@ -461,6 +468,7 @@
       document.getElementById('modCounter').textContent = `${filtered} / ${total}`;
     }
 
+    // Start the process
     loadData();
   </script>
 </body>
