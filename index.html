@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anbennar Sub-Mods</title>
-  <!-- Tabulator CSS -->
   <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
   <style>
-    /* -------- CUSTOM STYLES -------- */
+    /* same custom styles as before, unchanged */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
@@ -21,13 +20,11 @@
       gap: 10px;
       margin-bottom: 15px;
     }
-    /* Category dropdown */
     #categorySelect {
       padding: 6px 10px;
       border-radius: 4px;
       border: 1px solid #ccc;
     }
-    /* Tag selection area */
     #tagArea {
       display: flex;
       align-items: center;
@@ -79,28 +76,22 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .tag-option:hover {
-      background: #f0f0f0;
-    }
-    /* Search box */
+    .tag-option:hover { background: #f0f0f0; }
     #searchInput {
       padding: 6px 10px;
       border-radius: 4px;
       border: 1px solid #ccc;
       width: 200px;
     }
-    /* Page size */
     #pageSizeSelect {
       padding: 6px 10px;
       border-radius: 4px;
       border: 1px solid #ccc;
     }
-    /* Mod counter */
     #modCounter {
       font-weight: bold;
       margin-left: auto;
     }
-    /* Modal for dependency details */
     #depModal {
       display: none;
       position: fixed;
@@ -110,9 +101,7 @@
       align-items: center;
       justify-content: center;
     }
-    #depModal.active {
-      display: flex;
-    }
+    #depModal.active { display: flex; }
     .modal-content {
       background: white;
       padding: 20px;
@@ -129,7 +118,6 @@
       font-size: 24px;
       cursor: pointer;
     }
-    /* Links styling */
     .link-btn {
       display: inline-block;
       margin: 2px;
@@ -141,7 +129,6 @@
       font-size: 0.9em;
     }
     .link-btn:hover { background: #ddd; }
-    /* Dependency link inside cell */
     .dep-link {
       color: #0066cc;
       cursor: pointer;
@@ -149,13 +136,18 @@
       margin-right: 4px;
     }
     .dep-link:hover { color: #004499; }
+    /* New: fitData layout will allow horizontal scroll */
+    #modTable {
+      min-width: 100%;
+    }
+    .tabulator {
+      background-color: white;
+    }
   </style>
 </head>
 <body>
 
-  <!-- ========= CONTROLS ========= -->
   <div id="controls">
-    <!-- Category dropdown -->
     <select id="categorySelect">
       <option value="All">All</option>
       <option value="Gameplay">Gameplay</option>
@@ -165,17 +157,13 @@
       <option value="Miscellaneous">Miscellaneous</option>
     </select>
 
-    <!-- Tags area -->
     <div id="tagArea">
       <button id="addTagBtn" title="Add tag filter">+</button>
       <div id="tagDropdown"></div>
-      <!-- Chips appear here dynamically -->
     </div>
 
-    <!-- Search -->
     <input type="text" id="searchInput" placeholder="Search...">
 
-    <!-- Page size selector -->
     <select id="pageSizeSelect">
       <option value="10">10</option>
       <option value="20" selected>20</option>
@@ -183,14 +171,11 @@
       <option value="All">All</option>
     </select>
 
-    <!-- Mod counter -->
     <span id="modCounter">0 / 0</span>
   </div>
 
-  <!-- ========= TABLE CONTAINER ========= -->
   <div id="modTable"></div>
 
-  <!-- ========= DEPENDENCY MODAL ========= -->
   <div id="depModal">
     <div class="modal-content">
       <button class="modal-close">&times;</button>
@@ -205,197 +190,164 @@
     </div>
   </div>
 
-  <!-- ========= SCRIPTS ========= -->
-  <!-- Tabulator JS -->
   <script src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
   <script>
-    // ----------------------------------------------------------------------
-    // 1. YOUR MOD DATA – EDIT HERE TO ADD/REMOVE SUB-MODS
-    // ----------------------------------------------------------------------
-    const modData = [
-      {
-        name: "Example Mod 1",
-        category: "Gameplay",
-        tags: ["Missions", "Nations", "Religion"],
-        description: "Adds Jaddari missions, new tags and a custom religion.",
-        dependencies: ["Base Mod B", "Another Mod"],
-        links: {
-          browser: "https://steamcommunity.com/sharedfiles/filedetails/?id=111111",
-          steam: "steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=111111"
-        }
-      },
-      {
-        name: "Base Mod B",
-        category: "Miscellaneous",
-        tags: ["Standalone", "Tweak"],
-        description: "Standalone tweaks for vanilla EU4, no Anbennar needed.",
-        dependencies: [],
-        links: {
-          browser: "https://steamcommunity.com/sharedfiles/filedetails/?id=222222",
-          steam: "steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=222222"
-        }
-      },
-      {
-        name: "Another Mod",
-        category: "Compatch",
-        tags: ["Multiplayer", "Compilation"],
-        description: "Compilation of various multiplayer patches.",
-        dependencies: ["Example Mod 1"],
-        links: {
-          browser: "https://steamcommunity.com/sharedfiles/filedetails/?id=333333",
-          steam: "steam://openurl/https://steamcommunity.com/sharedfiles/filedetails/?id=333333"
-        }
-      },
-      // Add more mods here...
-    ];
+    // ======================================================================
+    // CONFIGURATION – PUT YOUR PUBLISHED GOOGLE SHEET CSV URL HERE
+    // ======================================================================
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/.../pub?output=csv'; // <-- REPLACE THIS
 
-    // ----------------------------------------------------------------------
-    // 2. GLOBAL STATE
-    // ----------------------------------------------------------------------
+    // ======================================================================
+    // GLOBAL STATE
+    // ======================================================================
     let table;
-    let selectedTags = [];            // array of tag strings currently filtering
+    let selectedTags = [];
     let currentCategory = "All";
     let currentSearch = "";
+    let modData = [];            // will be populated from CSV
 
-    // ----------------------------------------------------------------------
-    // 3. INITIALIZE TABLE
-    // ----------------------------------------------------------------------
-    document.addEventListener("DOMContentLoaded", function() {
+    // ======================================================================
+    // LOAD DATA FROM CSV, THEN BUILD TABLE
+    // ======================================================================
+    async function loadData() {
+      try {
+        const response = await fetch(CSV_URL);
+        const csvText = await response.text();
+        modData = parseCSV(csvText);
+        // After data is ready, build the table
+        buildTable();
+        setupControls();
+        applyFilters();
+      } catch (error) {
+        console.error('Failed to load data:', error);
+        document.getElementById('modTable').innerText = 'Error loading data. Check console.';
+      }
+    }
+
+    // Simple CSV parser (handles quoted fields, commas inside quotes)
+    function parseCSV(text) {
+      const lines = text.split('\n').filter(line => line.trim() !== '');
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.trim());
+      const data = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        for (let char of lines[i]) {
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            values.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current.trim()); // last value
+        if (values.length !== headers.length) continue; // skip malformed rows
+        const row = {};
+        headers.forEach((header, idx) => {
+          let val = values[idx].replace(/^"|"$/g, ''); // remove surrounding quotes
+          row[header] = val;
+        });
+        data.push(row);
+      }
+      return data;
+    }
+
+    // Convert CSV rows into mod objects the table expects
+    function transformRow(row) {
+      return {
+        name: row['Name'] || '',
+        category: row['Category'] || 'Miscellaneous',
+        tags: row['Tags'] ? row['Tags'].split(',').map(t => t.trim()).filter(t => t) : [],
+        description: row['Description'] || '',
+        dependencies: row['Dependencies'] ? row['Dependencies'].split(',').map(d => d.trim()).filter(d => d) : [],
+        links: {
+          browser: row['Link Browser'] || '#',
+          steam: row['Link Steam'] || '#'
+        }
+      };
+    }
+
+    // ======================================================================
+    // BUILD TABLE (called after data loaded)
+    // ======================================================================
+    function buildTable() {
+      // Transform raw CSV rows into the mod objects
+      const tableData = modData.map(transformRow);
+
       table = new Tabulator("#modTable", {
-        data: modData,
-        layout: "fitColumns",       // stretch columns to fill width
-        responsiveLayout: "collapse", // hide columns on small screens, show expand arrow
+        data: tableData,
+        layout: "fitData",           // columns size to content, horizontal scroll
+        responsiveLayout: "collapse",
         pagination: true,
         paginationSize: 20,
-        paginationSizeSelector: false, // we use our custom selector
+        paginationSizeSelector: false,
         columns: [
-          { 
-            title: "Name", 
-            field: "name", 
-            headerFilter: false,
-            responsive: 0,          // always visible
-            sorter: "string",
-            width: 200
-          },
-          { 
-            title: "Category", 
-            field: "category", 
-            responsive: 1,
-            sorter: "string",
-            width: 120
-          },
-          { 
-            title: "Tags", 
-            field: "tags", 
-            responsive: 2,
-            sorter: "string",
-            formatter: function(cell, formatterParams, onRendered) {
-              // Display tags as small colored badges
+          { title: "Name", field: "name", responsive: 0, sorter: "string", width: 200 },
+          { title: "Category", field: "category", responsive: 1, sorter: "string", width: 120 },
+          { title: "Tags", field: "tags", responsive: 2, formatter: function(cell) {
               const tags = cell.getValue() || [];
               return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
-            },
-            width: 250
-          },
-          { 
-            title: "Description", 
-            field: "description", 
-            responsive: 3,
-            sorter: "string",
-            formatter: "textarea",
-            width: 300
-          },
-          { 
-            title: "Dependencies", 
-            field: "dependencies", 
-            responsive: 4,
-            sorter: "string",
+            }, width: 250 },
+          { title: "Description", field: "description", responsive: 3, formatter: "textarea", width: 300 },
+          { title: "Dependencies", field: "dependencies", responsive: 4,
             formatter: function(cell) {
               const deps = cell.getValue() || [];
               if (deps.length === 0) return "—";
-              return deps.map(dep => 
-                `<span class="dep-link" data-dep="${dep}">${dep}</span>`
-              ).join(', ');
+              return deps.map(dep => `<span class="dep-link" data-dep="${dep}">${dep}</span>`).join(', ');
             },
-            width: 200,
             cellClick: function(e, cell) {
-              // If a dependency link was clicked, open its modal
               if (e.target.classList.contains('dep-link')) {
                 const depName = e.target.getAttribute('data-dep');
                 showDependencyModal(depName);
               }
-            }
-          },
-          { 
-            title: "Links", 
-            field: "links", 
-            responsive: 5,
-            sorter: "string",
+            }, width: 200 },
+          { title: "Links", field: "links", responsive: 5,
             formatter: function(cell) {
               const links = cell.getValue();
               if (!links) return "—";
-              return `
-                <a href="${links.browser}" target="_blank" class="link-btn" title="Open in browser">🌐</a>
-                <a href="${links.steam}" class="link-btn" title="Open in Steam">Steam</a>
-              `;
-            },
-            width: 100,
-            headerSort: false
-          }
+              return `<a href="${links.browser}" target="_blank" class="link-btn">🌐</a>
+                      <a href="${links.steam}" class="link-btn">Steam</a>`;
+            }, width: 100, headerSort: false }
         ],
-        // Update mod counter after data is filtered
-        dataFiltered: function(filters, rows) {
-          updateModCounter();
-        },
-        // Reapply custom filters when data changes (for search/tags/category)
-        dataLoaded: function(data) {
-          applyFilters();
-        }
+        dataFiltered: function() { updateModCounter(); }
       });
+    }
 
-      // Setup UI controls
-      setupControls();
-      // Initial application of filters (category is "All", no tags yet)
-      applyFilters();
-    });
-
-    // ----------------------------------------------------------------------
-    // 4. UI CONTROLS & EVENT HANDLERS
-    // ----------------------------------------------------------------------
+    // ======================================================================
+    // CONTROLS & FILTERS (exactly the same as before, but using modData)
+    // ======================================================================
     function setupControls() {
-      // Category dropdown
       document.getElementById('categorySelect').addEventListener('change', function(e) {
         currentCategory = e.target.value;
-        updateAvailableTags();   // tags shown in dropdown depend on category
+        updateAvailableTags();
         applyFilters();
       });
 
-      // Tag addition button
       document.getElementById('addTagBtn').addEventListener('click', function(e) {
         e.stopPropagation();
         const dropdown = document.getElementById('tagDropdown');
         dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        updateAvailableTags();  // refresh list
+        updateAvailableTags();
       });
 
-      // Close tag dropdown when clicking outside
       document.addEventListener('click', function() {
         document.getElementById('tagDropdown').style.display = 'none';
       });
 
-      // Search input
       document.getElementById('searchInput').addEventListener('input', function(e) {
         currentSearch = e.target.value.toLowerCase();
         applyFilters();
       });
 
-      // Page size selector
       document.getElementById('pageSizeSelect').addEventListener('change', function(e) {
         const val = e.target.value;
         if (val === "All") {
-          // When "All" selected, set page size to total filtered rows
           const filteredCount = table.getRows().length;
           table.setPageSize(filteredCount || 1);
-          // Hide pagination controls (optional)
           document.querySelector('.tabulator-paginator').style.display = 'none';
         } else {
           document.querySelector('.tabulator-paginator').style.display = '';
@@ -403,19 +355,16 @@
         }
       });
 
-      // Modal close button
       document.querySelector('#depModal .modal-close').addEventListener('click', closeModal);
       document.getElementById('depModal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
       });
     }
 
-    // ----------------------------------------------------------------------
-    // 5. FILTERING LOGIC
-    // ----------------------------------------------------------------------
     function applyFilters() {
+      if (!table) return;
       table.setFilter(customFilter);
-      // Ensure "All" page size still works after filtering
+      // handle "All" page size after filter
       const pageSizeEl = document.getElementById('pageSizeSelect');
       if (pageSizeEl.value === "All") {
         const filteredCount = table.getRows().length;
@@ -425,53 +374,30 @@
     }
 
     function customFilter(data) {
-      // Category filter
-      if (currentCategory !== "All" && data.category !== currentCategory) {
-        return false;
-      }
-      // Tag filter (AND logic: mod must contain ALL selected tags)
+      if (currentCategory !== "All" && data.category !== currentCategory) return false;
       if (selectedTags.length > 0) {
-        if (!data.tags || !selectedTags.every(tag => data.tags.includes(tag))) {
-          return false;
-        }
+        if (!data.tags || !selectedTags.every(tag => data.tags.includes(tag))) return false;
       }
-      // Search filter (case-insensitive across name, description, tags)
       if (currentSearch) {
-        const searchTarget = [
-          data.name,
-          data.description,
-          (data.tags || []).join(' ')
-        ].join(' ').toLowerCase();
-        if (!searchTarget.includes(currentSearch)) {
-          return false;
-        }
+        const searchTarget = [data.name, data.description, (data.tags || []).join(' ')].join(' ').toLowerCase();
+        if (!searchTarget.includes(currentSearch)) return false;
       }
       return true;
     }
 
-    // ----------------------------------------------------------------------
-    // 6. TAG SELECTION DYNAMICS
-    // ----------------------------------------------------------------------
     function updateAvailableTags() {
       const dropdown = document.getElementById('tagDropdown');
-      // Determine which mods are relevant based on current category
+      // modData already holds all raw CSV rows, but we need the transformed tags
       const relevantMods = currentCategory === "All" 
         ? modData 
-        : modData.filter(m => m.category === currentCategory);
-      
-      // Get all unique tags from those mods, excluding already selected ones
+        : modData.filter(row => transformRow(row).category === currentCategory);
       const allTags = new Set();
-      relevantMods.forEach(mod => {
-        (mod.tags || []).forEach(tag => allTags.add(tag));
+      relevantMods.forEach(row => {
+        const tags = transformRow(row).tags;
+        tags.forEach(tag => allTags.add(tag));
       });
       const available = [...allTags].filter(tag => !selectedTags.includes(tag)).sort();
-      
-      // Build dropdown options
-      dropdown.innerHTML = available.map(tag => 
-        `<div class="tag-option" data-tag="${tag}">${tag}</div>`
-      ).join('');
-      
-      // Add click listeners to options
+      dropdown.innerHTML = available.map(tag => `<div class="tag-option" data-tag="${tag}">${tag}</div>`).join('');
       dropdown.querySelectorAll('.tag-option').forEach(opt => {
         opt.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -500,11 +426,8 @@
 
     function renderTagChips() {
       const tagArea = document.getElementById('tagArea');
-      // Remove all existing chips (but keep the + button and dropdown)
       const existingChips = tagArea.querySelectorAll('.tag-chip');
       existingChips.forEach(chip => chip.remove());
-      
-      // Insert chips before the dropdown div
       const addBtn = document.getElementById('addTagBtn');
       selectedTags.forEach(tag => {
         const chip = document.createElement('span');
@@ -512,8 +435,6 @@
         chip.innerHTML = `${tag} <span class="remove-tag" data-tag="${tag}">&times;</span>`;
         tagArea.insertBefore(chip, addBtn);
       });
-      
-      // Attach remove events
       document.querySelectorAll('.remove-tag').forEach(btn => {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -523,31 +444,26 @@
       });
     }
 
-    // ----------------------------------------------------------------------
-    // 7. DEPENDENCY MODAL
-    // ----------------------------------------------------------------------
     function showDependencyModal(modName) {
-      const mod = modData.find(m => m.name === modName);
+      // find the mod by name in the transformed data
+      const allMods = modData.map(transformRow);
+      const mod = allMods.find(m => m.name === modName);
       if (!mod) {
-        alert(`Mod "${modName}" not found in database.`);
+        alert(`Mod "${modName}" not found.`);
         return;
       }
       document.getElementById('modalModName').textContent = mod.name;
       document.getElementById('modalCategory').textContent = mod.category;
       document.getElementById('modalTags').textContent = (mod.tags || []).join(', ') || '—';
       document.getElementById('modalDescription').textContent = mod.description || '—';
-      
       const linksSpan = document.getElementById('modalLinks');
       linksSpan.innerHTML = '';
       if (mod.links) {
-        linksSpan.innerHTML = `
-          <a href="${mod.links.browser}" target="_blank" class="link-btn">🌐 Browser</a>
-          <a href="${mod.links.steam}" class="link-btn">Steam</a>
-        `;
+        linksSpan.innerHTML = `<a href="${mod.links.browser}" target="_blank" class="link-btn">🌐 Browser</a>
+                               <a href="${mod.links.steam}" class="link-btn">Steam</a>`;
       } else {
         linksSpan.textContent = 'No links';
       }
-      
       document.getElementById('depModal').classList.add('active');
     }
 
@@ -555,17 +471,16 @@
       document.getElementById('depModal').classList.remove('active');
     }
 
-    // ----------------------------------------------------------------------
-    // 8. MOD COUNTER
-    // ----------------------------------------------------------------------
     function updateModCounter() {
       const filtered = table.getRows().length;
       const total = modData.length;
       document.getElementById('modCounter').textContent = `${filtered} / ${total}`;
     }
 
-    // Initial render of tag chips (empty)
-    renderTagChips();
+    // ======================================================================
+    // KICK OFF EVERYTHING
+    // ======================================================================
+    loadData();  // async, will build table when data arrives
   </script>
 </body>
 </html>
