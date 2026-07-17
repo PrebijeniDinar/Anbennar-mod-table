@@ -6,7 +6,6 @@
   <title>Anbennar Sub-Mods</title>
   <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css" rel="stylesheet">
   <style>
-    /* same custom styles as before, unchanged */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
@@ -136,7 +135,6 @@
       margin-right: 4px;
     }
     .dep-link:hover { color: #004499; }
-    /* New: fitData layout will allow horizontal scroll */
     #modTable {
       min-width: 100%;
     }
@@ -195,26 +193,19 @@
     // ======================================================================
     // CONFIGURATION – PUT YOUR PUBLISHED GOOGLE SHEET CSV URL HERE
     // ======================================================================
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/.../pub?output=csv'; // <-- REPLACE THIS
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtgc37M1MD3aBODr1Gz2zU92rj5dVausKxbFk2cr5nIzFEpFNge2T_t6Qm9X9x4y-GH46PCwOyP1nw/pub?gid=0&single=true&output=csv'; // <-- REPLACE THIS
 
-    // ======================================================================
-    // GLOBAL STATE
-    // ======================================================================
     let table;
     let selectedTags = [];
     let currentCategory = "All";
     let currentSearch = "";
-    let modData = [];            // will be populated from CSV
+    let modData = [];
 
-    // ======================================================================
-    // LOAD DATA FROM CSV, THEN BUILD TABLE
-    // ======================================================================
     async function loadData() {
       try {
         const response = await fetch(CSV_URL);
         const csvText = await response.text();
         modData = parseCSV(csvText);
-        // After data is ready, build the table
         buildTable();
         setupControls();
         applyFilters();
@@ -224,7 +215,6 @@
       }
     }
 
-    // Simple CSV parser (handles quoted fields, commas inside quotes)
     function parseCSV(text) {
       const lines = text.split('\n').filter(line => line.trim() !== '');
       if (lines.length < 2) return [];
@@ -244,11 +234,11 @@
             current += char;
           }
         }
-        values.push(current.trim()); // last value
-        if (values.length !== headers.length) continue; // skip malformed rows
+        values.push(current.trim());
+        if (values.length !== headers.length) continue;
         const row = {};
         headers.forEach((header, idx) => {
-          let val = values[idx].replace(/^"|"$/g, ''); // remove surrounding quotes
+          let val = values[idx].replace(/^"|"$/g, '');
           row[header] = val;
         });
         data.push(row);
@@ -256,31 +246,31 @@
       return data;
     }
 
-    // Convert CSV rows into mod objects the table expects
+    function generateLinks(workshopId) {
+      if (!workshopId || workshopId.trim() === '') return null;
+      const browserUrl = `https://steamcommunity.com/sharedfiles/filedetails/?id=${workshopId}`;
+      const steamUrl = `steam://openurl/${browserUrl}`;
+      return { browser: browserUrl, steam: steamUrl };
+    }
+
     function transformRow(row) {
       return {
         name: row['Name'] || '',
         category: row['Category'] || 'Miscellaneous',
         tags: row['Tags'] ? row['Tags'].split(',').map(t => t.trim()).filter(t => t) : [],
         description: row['Description'] || '',
-        dependencies: row['Dependencies'] ? row['Dependencies'].split(',').map(d => d.trim()).filter(d => d) : [],
-        links: {
-          browser: row['Link Browser'] || '#',
-          steam: row['Link Steam'] || '#'
-        }
+        // Changed to use the new column name:
+        dependencies: row['Dependency/Compatch'] ? row['Dependency/Compatch'].split(',').map(d => d.trim()).filter(d => d) : [],
+        links: generateLinks(row['Workshop ID'] || '')
       };
     }
 
-    // ======================================================================
-    // BUILD TABLE (called after data loaded)
-    // ======================================================================
     function buildTable() {
-      // Transform raw CSV rows into the mod objects
       const tableData = modData.map(transformRow);
 
       table = new Tabulator("#modTable", {
         data: tableData,
-        layout: "fitData",           // columns size to content, horizontal scroll
+        layout: "fitData",
         responsiveLayout: "collapse",
         pagination: true,
         paginationSize: 20,
@@ -317,9 +307,6 @@
       });
     }
 
-    // ======================================================================
-    // CONTROLS & FILTERS (exactly the same as before, but using modData)
-    // ======================================================================
     function setupControls() {
       document.getElementById('categorySelect').addEventListener('change', function(e) {
         currentCategory = e.target.value;
@@ -364,7 +351,6 @@
     function applyFilters() {
       if (!table) return;
       table.setFilter(customFilter);
-      // handle "All" page size after filter
       const pageSizeEl = document.getElementById('pageSizeSelect');
       if (pageSizeEl.value === "All") {
         const filteredCount = table.getRows().length;
@@ -387,7 +373,6 @@
 
     function updateAvailableTags() {
       const dropdown = document.getElementById('tagDropdown');
-      // modData already holds all raw CSV rows, but we need the transformed tags
       const relevantMods = currentCategory === "All" 
         ? modData 
         : modData.filter(row => transformRow(row).category === currentCategory);
@@ -445,7 +430,6 @@
     }
 
     function showDependencyModal(modName) {
-      // find the mod by name in the transformed data
       const allMods = modData.map(transformRow);
       const mod = allMods.find(m => m.name === modName);
       if (!mod) {
@@ -477,10 +461,7 @@
       document.getElementById('modCounter').textContent = `${filtered} / ${total}`;
     }
 
-    // ======================================================================
-    // KICK OFF EVERYTHING
-    // ======================================================================
-    loadData();  // async, will build table when data arrives
+    loadData();
   </script>
 </body>
 </html>
