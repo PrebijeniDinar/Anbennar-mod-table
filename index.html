@@ -332,7 +332,7 @@
               return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
             }, },
           { title: "Description", field: "description", responsive: 3, formatter: "textarea" },
-          { title: "Dependencies", field: "dependencies", responsive: 4,
+          { title: "Dependencies", field: "dependencies", responsive: 4, cssClass: "deps-cell", width: 300, widthShrink: 0, widthGrow: 0, 
             formatter: function(cell) {
               const deps = cell.getValue() || [];
               if (deps.length === 0) return "—";
