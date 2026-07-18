@@ -301,7 +301,7 @@
           { title: "Tags", field: "tags", responsive: 2, cssClass: "tags-cell", formatter: function(cell) {
               const tags = cell.getValue() || [];
               return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
-            }, widthGrow: 2 },
+            }, },
           { title: "Description", field: "description", responsive: 3, formatter: "textarea" },
           { title: "Dependencies", field: "dependencies", responsive: 4,
             formatter: function(cell) {
