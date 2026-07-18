@@ -293,7 +293,7 @@
           { title: "Tags", field: "tags", responsive: 2, formatter: function(cell) {
               const tags = cell.getValue() || [];
               return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
-            }, width: 250 },
+            } },
           { title: "Description", field: "description", responsive: 3, formatter: "textarea" },
           { title: "Dependencies", field: "dependencies", responsive: 4,
             formatter: function(cell) {
