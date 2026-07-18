@@ -518,7 +518,8 @@
     }
 
     function updateModCounter() {
-      const filtered = table.getRows().length;
+      if (!table) return;
+      const filtered = table.getRows("active").length;
       const total = modData.length;
       document.getElementById('modCounter').textContent = `${filtered} / ${total}`;
     }
