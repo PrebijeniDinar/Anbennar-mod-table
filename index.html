@@ -136,10 +136,13 @@
     }
     .dep-link:hover { color: #004499; }
     #modTable {
-      min-width: 100%;
+      width: 100% !important;
+      max-width: 100%;
+      overflow-x: auto;   /* keep horizontal scroll only if really needed */
     }
     .tabulator {
       background-color: white;
+      width: 100% !important;
     }
   </style>
 </head>
