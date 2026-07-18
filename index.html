@@ -297,7 +297,7 @@
         paginationSizeSelector: false,
         columns: [
           { title: "Name", field: "name", responsive: 0, sorter: "string" },
-          { title: "Category", field: "category", responsive: 1, sorter: "string" },
+          { title: "Category", field: "category", responsive: 1, sorter: "string", width: 100, widthShrink: 0, widthGrow: 0 },
           { title: "Tags", field: "tags", responsive: 2, cssClass: "tags-cell", formatter: function(cell) {
               const tags = cell.getValue() || [];
               return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
