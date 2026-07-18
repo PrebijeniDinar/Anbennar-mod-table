@@ -359,14 +359,18 @@
             }, width: 130, widthShrink: 0, widthGrow: 0, headerSort: false }
         ],
         // Wait for the table to be fully built before applying filters
-          dataLoaded: function() {
-            applyFilters();
-            // tiny delay ensures filters are active
-            setTimeout(() => updateModCounter(), 10);
-          },
-          dataFiltered: function() {
-            updateModCounter();
+         renderComplete: function() {
+      // This runs after the very first visual render (and after every page change, etc.)
+          if (!initialRenderDone) {
+            initialRenderDone = true;
+            applyFilters();           // set the initial empty filter
+            setTimeout(() => updateModCounter(), 10);  // tiny delay to be safe
           }
+      // For subsequent renders, dataFiltered will handle the counter.
+    },
+    dataFiltered: function() {
+      updateModCounter();
+    }
       });
     }
 
@@ -419,7 +423,6 @@
         const filteredCount = table.getRows().length;
         table.setPageSize(filteredCount || 1);
       }
-      updateModCounter();
     }
 
     function customFilter(data) {
@@ -520,7 +523,7 @@
 
     function updateModCounter() {
       if (!table) return;
-      const filtered = table.getRows("active").length;
+      const filtered = table.getDataCount("active");   // only rows passing filters
       const total = modData.length;
       document.getElementById('modCounter').textContent = `${filtered} / ${total}`;
     }
