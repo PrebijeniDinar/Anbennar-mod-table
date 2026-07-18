@@ -35,10 +35,11 @@
       border-radius: 12px;
       padding: 4px 10px;
       font-size: 0.85em;
-      display: inline-flex;
+      display: inline-block;
       align-items: center;
       gap: 5px;
       cursor: default;
+      white-space: nowrap;
     }
     .tag-chip .remove-tag {
       cursor: pointer;
@@ -144,6 +145,13 @@
       background-color: white;
       width: 100% !important;
     }
+    .tabulator .tabulator-cell.tags-cell {
+      white-space: normal;      /* allow text to wrap */
+      word-break: keep-all;     /* keep tags together, break only between them */
+      line-height: 1.6;         /* a bit more vertical breathing room */
+    }
+
+    
   </style>
 </head>
 <body>
@@ -290,7 +298,7 @@
         columns: [
           { title: "Name", field: "name", responsive: 0, sorter: "string" },
           { title: "Category", field: "category", responsive: 1, sorter: "string" },
-          { title: "Tags", field: "tags", responsive: 2, formatter: function(cell) {
+          { title: "Tags", field: "tags", responsive: 2, cssClass: "tags-cell", formatter: function(cell) {
               const tags = cell.getValue() || [];
               return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
             }, widthGrow: 2 },
