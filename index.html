@@ -157,24 +157,33 @@
 <body>
 
   <div id="controls">
-    <select id="categorySelect">
-      <option value="All">All</option>
-      <option value="Gameplay">Gameplay</option>
-      <option value="Compatch">Compatch</option>
-      <option value="Graphical">Graphical</option>
-      <option value="Flavour">Flavour</option>
-      <option value="Miscellaneous">Miscellaneous</option>
-    </select>
-
-    <div id="tagArea">
-      <button id="addTagBtn" title="Add tag filter">+</button>
-      <div id="tagDropdown"></div>
+    <!-- Category block -->
+    <div class="filter-group">
+      <label for="categorySelect" class="filter-label">Category</label>
+      <select id="categorySelect">
+        <option value="All">All</option>
+        <option value="Gameplay">Gameplay</option>
+        <option value="Compatch">Compatch</option>
+        <option value="Graphical">Graphical</option>
+        <option value="Flavour">Flavour</option>
+       <option value="Miscellaneous">Miscellaneous</option>
+      </select>
     </div>
 
+    <!-- Tags block -->
+    <div class="filter-group">
+      <span class="filter-label">Tags</span>
+      <div id="tagArea">
+        <button id="addTagBtn" title="Add tag filter">+</button>
+        <div id="tagDropdown"></div>
+      </div>
+    </div>
+
+    <!-- Search, page size, mod counter remain as before -->
     <input type="text" id="searchInput" placeholder="Search...">
 
     <select id="pageSizeSelect">
-      <option value="10">10</option>
+     <option value="10">10</option>
       <option value="20" selected>20</option>
       <option value="50">50</option>
       <option value="All">All</option>
