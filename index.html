@@ -361,7 +361,8 @@
         // Wait for the table to be fully built before applying filters
         tableBuilt: function() {
           applyFilters();
-          updateModCounter();
+          // Delay the counter update by one microtask to ensure filters are in place
+          setTimeout(() => updateModCounter(), 0);
         },
         dataFiltered: function() {
           updateModCounter();
