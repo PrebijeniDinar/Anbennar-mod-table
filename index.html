@@ -358,19 +358,16 @@
                       <a href="${links.steam}" class="link-btn">Steam</a>`;
             }, width: 130, widthShrink: 0, widthGrow: 0, headerSort: false }
         ],
-        // Wait for the table to be fully built before applying filters
-         renderComplete: function() {
-      // This runs after the very first visual render (and after every page change, etc.)
+        tableBuilt: function() {
+          applyFilters();
+        }, 
+        renderComplete: function() {
           if (!initialRenderDone) {
             initialRenderDone = true;
-            applyFilters();           // set the initial empty filter
-            setTimeout(() => updateModCounter(), 10);  // tiny delay to be safe
+            applyFilters();        
+            setTimeout(() => updateModCounter(), 10); 
           }
-      // For subsequent renders, dataFiltered will handle the counter.
     },
-    dataFiltered: function() {
-      updateModCounter();
-    }
       });
     }
 
