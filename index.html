@@ -15,7 +15,7 @@
     #controls {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-end;
       gap: 10px;
       margin-bottom: 15px;
     }
@@ -172,40 +172,51 @@
 <body>
 
   <div id="controls">
-    <!-- Category block -->
-    <div class="filter-group">
-      <label for="categorySelect" class="filter-label">Category</label>
-      <select id="categorySelect">
-        <option value="All">All</option>
-        <option value="Gameplay">Gameplay</option>
-        <option value="Compatch">Compatch</option>
-        <option value="Graphical">Graphical</option>
-        <option value="Flavour">Flavour</option>
-       <option value="Miscellaneous">Miscellaneous</option>
-      </select>
+  <!-- Category -->
+  <div class="filter-group">
+    <label for="categorySelect" class="filter-label">Category</label>
+    <select id="categorySelect">
+      <option value="All">All</option>
+      <option value="Gameplay">Gameplay</option>
+      <option value="Compatch">Compatch</option>
+      <option value="Graphical">Graphical</option>
+      <option value="Flavour">Flavour</option>
+      <option value="Miscellaneous">Miscellaneous</option>
+    </select>
+  </div>
+
+  <!-- Tags -->
+  <div class="filter-group">
+    <span class="filter-label">Tags</span>
+    <div id="tagArea">
+      <button id="addTagBtn" title="Add tag filter">+</button>
+      <div id="tagDropdown"></div>
     </div>
+  </div>
 
-    <!-- Tags block -->
-    <div class="filter-group">
-      <span class="filter-label">Tags</span>
-      <div id="tagArea">
-        <button id="addTagBtn" title="Add tag filter">+</button>
-        <div id="tagDropdown"></div>
-      </div>
-    </div>
+  <!-- Search -->
+  <div class="filter-group">
+    <label for="searchInput" class="filter-label">Search</label>
+    <input type="text" id="searchInput" placeholder="...">
+  </div>
 
-    <!-- Search, page size, mod counter remain as before -->
-    <input type="text" id="searchInput" placeholder="Search...">
-
+  <!-- Page size -->
+  <div class="filter-group">
+    <label for="pageSizeSelect" class="filter-label">Show</label>
     <select id="pageSizeSelect">
-     <option value="10">10</option>
+      <option value="10">10</option>
       <option value="20" selected>20</option>
       <option value="50">50</option>
       <option value="All">All</option>
     </select>
+  </div>
 
+  <!-- Mod counter (no label, but still in a filter-group to keep spacing) -->
+  <div class="filter-group">
+    <span class="filter-label">&nbsp;</span>  <!-- invisible spacer to push counter down -->
     <span id="modCounter">0 / 0</span>
   </div>
+</div>
 
   <div id="modTable"></div>
 
