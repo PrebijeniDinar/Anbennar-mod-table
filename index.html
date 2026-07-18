@@ -288,13 +288,13 @@
         paginationSize: 20,
         paginationSizeSelector: false,
         columns: [
-          { title: "Name", field: "name", responsive: 0, sorter: "string", width: 200 },
-          { title: "Category", field: "category", responsive: 1, sorter: "string", width: 120 },
+          { title: "Name", field: "name", responsive: 0, sorter: "string" },
+          { title: "Category", field: "category", responsive: 1, sorter: "string" },
           { title: "Tags", field: "tags", responsive: 2, formatter: function(cell) {
               const tags = cell.getValue() || [];
               return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
             }, width: 250 },
-          { title: "Description", field: "description", responsive: 3, formatter: "textarea", width: 300 },
+          { title: "Description", field: "description", responsive: 3, formatter: "textarea" },
           { title: "Dependencies", field: "dependencies", responsive: 4,
             formatter: function(cell) {
               const deps = cell.getValue() || [];
@@ -306,14 +306,14 @@
                 const depName = e.target.getAttribute('data-dep');
                 showDependencyModal(depName);
               }
-            }, width: 200 },
+            } },
           { title: "Links", field: "links", responsive: 5,
             formatter: function(cell) {
               const links = cell.getValue();
               if (!links) return "—";
               return `<a href="${links.browser}" target="_blank" class="link-btn">🌐</a>
                       <a href="${links.steam}" class="link-btn">Steam</a>`;
-            }, width: 130, headerSort: false }
+            }, headerSort: false }
         ],
         // Wait for the table to be fully built before applying filters
         tableBuilt: function() {
