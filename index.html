@@ -298,9 +298,9 @@
         columns: [
           { title: "Name", field: "name", responsive: 0, sorter: "string" },
           { title: "Category", field: "category", responsive: 1, sorter: "string", width: 100, widthShrink: 0, widthGrow: 0 },
-          { title: "Tags", field: "tags", responsive: 2, cssClass: "tags-cell", formatter: function(cell) {
+          { title: "Tags", field: "tags", responsive: 2, cssClass: "tags-cell", width: 310, widthShrink: 0, widthGrow: 0, formatter: function(cell) {
               const tags = cell.getValue() || [];
-              return `<div style="max-width: 340px;">` + tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
+              return tags.map(tag => `<span class="tag-chip" style="font-size:0.75em; margin:1px;">${tag}</span>`).join('');
             }, },
           { title: "Description", field: "description", responsive: 3, formatter: "textarea" },
           { title: "Dependencies", field: "dependencies", responsive: 4,
