@@ -359,14 +359,14 @@
             }, width: 130, widthShrink: 0, widthGrow: 0, headerSort: false }
         ],
         // Wait for the table to be fully built before applying filters
-        tableBuilt: function() {
-          applyFilters();
-          // Delay the counter update by one microtask to ensure filters are in place
-          setTimeout(() => updateModCounter(), 0);
-        },
-        dataFiltered: function() {
-          updateModCounter();
-        }
+          dataLoaded: function() {
+            applyFilters();
+            // tiny delay ensures filters are active
+            setTimeout(() => updateModCounter(), 10);
+          },
+          dataFiltered: function() {
+            updateModCounter();
+          }
       });
     }
 
