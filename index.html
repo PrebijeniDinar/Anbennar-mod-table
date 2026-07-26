@@ -171,11 +171,27 @@
       word-break: keep-all;      /* keep dependency names together, break after commas */
       line-height: 1.6;
     }
-    
+
+
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;          /* no body scrollbar – the container handles it */
+    }
+
+    #app-container {
+      height: 100vh;             /* exactly the iframe’s height */
+      overflow-y: auto;          /* scrolls when table is taller than the iframe */
+      padding: 10px;             /* optional, matches your current body padding */
+      box-sizing: border-box;
+    }
+
   </style>
 </head>
 <body>
-
+  <div id="app-container">
   <div id="controls">
   <!-- Category -->
   <div class="filter-group">
@@ -232,7 +248,7 @@
       </p>
     </div>
   </div>
-
+ </div>
   <script src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
   <script>
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
