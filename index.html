@@ -392,7 +392,7 @@
         currentSearch = e.target.value.toLowerCase();
         applyFilters();
       });
-
+ 
       document.getElementById('pageSizeSelect').addEventListener('change', function(e) {
         const val = e.target.value;
         if (val === "All") {
@@ -524,8 +524,28 @@
       document.getElementById('modCounter').textContent = `${filtered} / ${total}`;
     }
 
-    // Start the process
+
     loadData();
+
+
+  function reportHeight() {
+    const height = document.body.scrollHeight;
+    window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+  }
+
+
+  const observer = new MutationObserver(() => {
+    reportHeight();
+  });
+  observer.observe(document.getElementById('modTable'), { childList: true, subtree: true });
+
+
+  window.addEventListener('load', reportHeight);
+  window.addEventListener('resize', reportHeight);
+
+    
+
+
   </script>
 </body>
 </html>
