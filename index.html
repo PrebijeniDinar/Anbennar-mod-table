@@ -515,17 +515,26 @@ function customFilter(data) {
   // --- new language filter ---
   if (otherLangsEnabled) {
     const tags = data.tags || [];
+    const hasLangTag = tags.some(tag => tag.startsWith('Language - '));
 
-    // If "Hide English entries" is checked, the mod must have at least one "Language -" tag
-    if (hideEnglish && !tags.some(tag => tag.startsWith('Language - '))) {
+    // If "Hide English entries" is checked, mod must have at least one Language - tag
+    if (hideEnglish && !hasLangTag) {
       return false;
     }
 
-    // If a specific language is selected, require exactly that tag
+    // Language dropdown filtering (only among language-tagged mods if a specific language is selected)
     if (selectedLanguage !== "All") {
       const requiredTag = 'Language - ' + selectedLanguage;
-      if (!tags.includes(requiredTag)) {
-        return false;
+      // If hideEnglish is off, allow mods without any language tag (i.e., English/default)
+      if (hideEnglish) {
+        // Must have the required tag (since non-language mods already hidden)
+        if (!tags.includes(requiredTag)) return false;
+      } else {
+        // If the mod has any language tag, it must include the required one;
+        // if it has no language tag, it's allowed.
+        if (hasLangTag && !tags.includes(requiredTag)) {
+          return false;
+        }
       }
     }
   }
