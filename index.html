@@ -172,12 +172,13 @@
       line-height: 1.6;
     }
 
-  #langPanel {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
+#langPanel {
+  display: none;              /* hidden initially */
+  flex-direction: column;    /* stack label above the row */
+  align-items: flex-start;
+  gap: 4px;
+}
+
   #langSelect {
     padding: 4px 6px;
     border-radius: 4px;
@@ -228,13 +229,13 @@
     </select>
   </div>
 
-    <!-- Language filter -->
+  <!-- Language filter -->
   <div class="filter-group">
-    <span class="filter-label">Language</span>
     <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
       <input type="checkbox" id="otherLangsCheck"> Other languages
     </label>
-    <div id="langPanel" style="display:none; margin-top: 4px;">
+    <div id="langPanel" style="display:none;">
+      <span class="filter-label">Language</span>
       <select id="langSelect" style="margin-right: 6px;">
         <option value="All">All</option>
       </select>
