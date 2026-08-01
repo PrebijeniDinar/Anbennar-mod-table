@@ -171,6 +171,18 @@
       word-break: keep-all;      /* keep dependency names together, break after commas */
       line-height: 1.6;
     }
+
+  #langPanel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #langSelect {
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
     
   </style>
 </head>
@@ -215,6 +227,23 @@
       <option value="All">All</option>
     </select>
   </div>
+
+    <!-- Language filter -->
+  <div class="filter-group">
+    <span class="filter-label">Language</span>
+    <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+      <input type="checkbox" id="otherLangsCheck"> Other languages
+    </label>
+    <div id="langPanel" style="display:none; margin-top: 4px;">
+      <select id="langSelect" style="margin-right: 6px;">
+        <option value="All">All</option>
+      </select>
+      <label style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+        <input type="checkbox" id="hideEnglishCheck"> Hide English entries
+      </label>
+    </div>
+  </div>
+
 </div>
 
   <div id="modTable"></div>
@@ -245,6 +274,9 @@
     let selectedTags = [];
     let currentCategory = "All";
     let currentSearch = "";
+    let otherLangsEnabled = false;
+    let selectedLanguage = "All";
+    let hideEnglish = false;
     let modData = [];
 
     async function loadData() {
@@ -262,6 +294,7 @@
     const response = await fetch(proxyUrl);
     const csvText = await response.text();
     modData = parseCSV(csvText);
+    populateLanguages();
     buildTable();
     setupControls();
   } catch (error) {
@@ -299,6 +332,27 @@
         data.push(row);
       }
       return data;
+    }
+
+    function populateLanguages() {
+      const langSelect = document.getElementById('langSelect');
+      const languages = new Set();
+      modData.forEach(row => {
+       const tags = row['Tags'] ? row['Tags'].split(',').map(t => t.trim()) : [];
+       tags.forEach(tag => {
+         if (tag.startsWith('Language - ')) {
+           languages.add(tag.replace('Language - ', '').trim());
+          }
+       });
+      });
+  
+      langSelect.innerHTML = '<option value="All">All</option>';
+      [...languages].sort().forEach(lang => {
+        const opt = document.createElement('option');
+        opt.value = lang;
+        opt.textContent = lang;
+       langSelect.appendChild(opt);
+      });
     }
 
     function generateLinks(workshopId) {
@@ -409,6 +463,32 @@
       document.getElementById('depModal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
       });
+
+      // Language filter controls
+      document.getElementById('otherLangsCheck').addEventListener('change', function(e) {
+        otherLangsEnabled = e.target.checked;
+        document.getElementById('langPanel').style.display = otherLangsEnabled ? 'flex' : 'none';
+        if (!otherLangsEnabled) {
+         // Reset language filters when disabling the feature
+          selectedLanguage = "All";
+         hideEnglish = false;
+          document.getElementById('langSelect').value = 'All';
+          document.getElementById('hideEnglishCheck').checked = false;
+        }
+       applyFilters();
+      });
+
+      document.getElementById('hideEnglishCheck').addEventListener('change', function(e) {
+       hideEnglish = e.target.checked;
+       applyFilters();
+      });
+
+      document.getElementById('langSelect').addEventListener('change', function(e) {
+       selectedLanguage = e.target.value;
+       applyFilters();
+      });
+
+      
     }
 
     function applyFilters() {
@@ -421,17 +501,37 @@
       }
     }
 
-    function customFilter(data) {
-      if (currentCategory !== "All" && data.category !== currentCategory) return false;
-      if (selectedTags.length > 0) {
-        if (!data.tags || !selectedTags.every(tag => data.tags.includes(tag))) return false;
-      }
-      if (currentSearch) {
-        const searchTarget = [data.name, data.description, (data.tags || []).join(' ')].join(' ').toLowerCase();
-        if (!searchTarget.includes(currentSearch)) return false;
-      }
-      return true;
+function customFilter(data) {
+  // --- existing filters (category, tags, search) ---
+  if (currentCategory !== "All" && data.category !== currentCategory) return false;
+  if (selectedTags.length > 0) {
+    if (!data.tags || !selectedTags.every(tag => data.tags.includes(tag))) return false;
+  }
+  if (currentSearch) {
+    const searchTarget = [data.name, data.description, (data.tags || []).join(' ')].join(' ').toLowerCase();
+    if (!searchTarget.includes(currentSearch)) return false;
+  }
+
+  // --- new language filter ---
+  if (otherLangsEnabled) {
+    const tags = data.tags || [];
+
+    // If "Hide English entries" is checked, the mod must have at least one "Language -" tag
+    if (hideEnglish && !tags.some(tag => tag.startsWith('Language - '))) {
+      return false;
     }
+
+    // If a specific language is selected, require exactly that tag
+    if (selectedLanguage !== "All") {
+      const requiredTag = 'Language - ' + selectedLanguage;
+      if (!tags.includes(requiredTag)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
 
     function updateAvailableTags() {
       const dropdown = document.getElementById('tagDropdown');
