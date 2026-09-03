@@ -280,10 +280,11 @@
     let hideEnglish = false;
     let modData = [];
 
-    async function loadData() {
+async function loadData() {
   try {
-    // Fetch the CSV file from the same repository (same origin)
-    const response = await fetch('mods.csv');
+    const proxyUrl = 'https://script.google.com/macros/s/AKfycbxqd_Rhd7cEvWUmwit3QWdTnrViWNHlzL2vUJJ-1e8WFTbxhVnj3ShcB68CYmQK-YJQ/exec'; // AppScript exec URL HERE DUMBASS
+
+    const response = await fetch(proxyUrl);
     const csvText = await response.text();
     modData = parseCSV(csvText);
     populateLanguages();
