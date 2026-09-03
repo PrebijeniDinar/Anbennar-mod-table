@@ -290,7 +290,7 @@
     const bustedUrl = sheetUrl + separator + 'cache=' + Date.now();
     
     // Wrap in CORS proxy
-    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(bustedUrl);
+    const proxyUrl = 'https://cors.bridged.cc/' + bustedUrl;
     
     const response = await fetch(proxyUrl);
     const csvText = await response.text();
