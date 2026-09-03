@@ -1,0 +1,25 @@
+name: Update CSV from Google Sheets
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # every 15 minutes
+  workflow_dispatch:          # allows manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download CSV
+        run: |
+          curl -L "https://docs.google.com/spreadsheets/d/e/2PACX-1vQtgc37M1MD3aBODr1Gz2zU92rj5dVausKxbFk2cr5nIzFEpFNge2T_t6Qm9X9x4y-GH46PCwOyP1nw/pub?output=csv" -o mods.csv
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mods.csv
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update mods CSV"
+          git push
